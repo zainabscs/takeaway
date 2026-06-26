@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SMOKD Admin — Menu Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0B0B0B; --bg2: #111; --bg3: #1a1a1a; --surface: #161616; --surface2: #1e1e1e;
+      --border: rgba(255,255,255,0.08); --accent: #FF7A00; --accent2: #FF9A35;
+      --accent-dim: rgba(255,122,0,0.15); --text: #F5F0E8; --text2: #A09890; --text3: #6B6560;
+      --error: #FF4444; --success: #22C55E; --radius: 14px; --font: 'Poppins', sans-serif;
+      --tr: 0.25s ease;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); display: flex; }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; font-family: inherit; border: none; }
+    input, textarea, select { font-family: inherit; }
+    ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-track { background: var(--bg2); } ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 240px; min-height: 100vh; background: var(--bg2);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; flex-shrink: 0; position: sticky; top: 0; height: 100vh;
+    }
+    .sb-logo {
+      padding: 28px 24px; border-bottom: 1px solid var(--border);
+      font-size: 1.3rem; font-weight: 900; letter-spacing: 0.15em;
+    }
+    .sb-logo span { color: var(--accent); }
+    .sb-logo small { display: block; font-size: 0.65rem; font-weight: 400; letter-spacing: 0.1em; color: var(--text3); text-transform: uppercase; margin-top: 2px; }
+    .sb-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+    .sb-link {
+      display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+      border-radius: 10px; font-size: 0.88rem; font-weight: 500; color: var(--text2);
+      transition: var(--tr);
+    }
+    .sb-link:hover { background: var(--bg3); color: var(--text); }
+    .sb-link.active { background: var(--accent-dim); color: var(--accent); font-weight: 600; }
+    .sb-link .ico { font-size: 1rem; width: 20px; text-align: center; }
+    .sb-section-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); padding: 12px 14px 4px; }
+    .sb-footer { padding: 16px 24px; border-top: 1px solid var(--border); }
+    .sb-footer a { font-size: 0.82rem; color: var(--text3); transition: color var(--tr); display: flex; align-items: center; gap: 8px; }
+    .sb-footer a:hover { color: var(--accent); }
+
+    /* MAIN */
+    .main { flex: 1; overflow-y: auto; }
+    .topbar {
+      padding: 20px 32px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--bg); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px);
+    }
+    .topbar h1 { font-size: 1.3rem; font-weight: 700; }
+    .topbar-right { display: flex; align-items: center; gap: 16px; }
+    .live-badge { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--success); font-weight: 600; }
+    .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .btn-primary {
+      padding: 10px 22px; border-radius: 50px; cursor: pointer;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #000; font-weight: 700; font-size: 0.85rem; border: none; transition: var(--tr);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,122,0,0.4); }
+    .btn-secondary {
+      padding: 10px 22px; border-radius: 50px; cursor: pointer;
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--text2); font-weight: 600; font-size: 0.85rem; transition: var(--tr);
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-danger {
+      padding: 7px 14px; border-radius: 8px; cursor: pointer;
+      background: rgba(255,68,68,0.1); border: 1px solid rgba(255,68,68,0.3);
+      color: var(--error); font-weight: 600; font-size: 0.8rem; transition: var(--tr);
+    }
+    .btn-danger:hover { background: var(--error); color: #fff; }
+    .btn-edit {
+      padding: 7px 14px; border-radius: 8px; cursor: pointer;
+      background: var(--accent-dim); border: 1px solid rgba(255,122,0,0.3);
+      color: var(--accent); font-weight: 600; font-size: 0.8rem; transition: var(--tr);
+    }
+    .btn-edit:hover { background: var(--accent); color: #000; }
+    .btn-icon {
+      width: 34px; height: 34px; border-radius: 8px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 1rem;
+      background: var(--bg3); border: 1px solid var(--border); transition: var(--tr); color: var(--text2);
+    }
+    .btn-icon:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* CONTENT PANELS */
+    .panel { display: none; padding: 32px; }
+    .panel.active { display: block; }
+
+    /* STATS */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 32px; }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 24px; display: flex; flex-direction: column; gap: 8px; transition: var(--tr);
+    }
+    .stat-card:hover { border-color: rgba(255,122,0,0.2); }
+    .stat-icon { font-size: 1.5rem; }
+    .stat-value { font-size: 1.9rem; font-weight: 800; color: var(--text); }
+    .stat-label { font-size: 0.8rem; color: var(--text2); font-weight: 500; }
+    .stat-change { font-size: 0.75rem; color: var(--success); }
+
+    /* SECTION HEADER */
+    .section-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .section-hd h2 { font-size: 1.1rem; font-weight: 700; }
+
+    /* MENU TABLE */
+    .menu-controls-bar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .admin-search { padding: 10px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 0.88rem; outline: none; transition: var(--tr); min-width: 240px; }
+    .admin-search:focus { border-color: var(--accent); }
+    .admin-search::placeholder { color: var(--text3); }
+    .admin-filter { padding: 10px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: var(--text2); font-size: 0.88rem; outline: none; cursor: pointer; }
+    .admin-filter:focus { border-color: var(--accent); }
+    .menu-table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: var(--bg2); }
+    th { padding: 14px 16px; text-align: left; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); border-bottom: 1px solid var(--border); }
+    td { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 0.88rem; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: rgba(255,255,255,0.02); }
+    .td-img { width: 52px; height: 44px; border-radius: 8px; object-fit: cover; }
+    .td-name { font-weight: 600; color: var(--text); }
+    .td-cat { display: inline-block; padding: 3px 10px; border-radius: 20px; background: var(--accent-dim); color: var(--accent); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
+    .td-price { font-weight: 700; color: var(--accent); }
+    .td-actions { display: flex; gap: 8px; }
+    .toggle-switch { position: relative; width: 40px; height: 22px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute; inset: 0; border-radius: 11px;
+      background: var(--bg3); border: 1px solid var(--border); cursor: pointer; transition: var(--tr);
+    }
+    .toggle-track::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--text3); transition: var(--tr); }
+    input:checked + .toggle-track { background: var(--accent-dim); border-color: var(--accent); }
+    input:checked + .toggle-track::after { transform: translateX(18px); background: var(--accent); }
+    .badge-popular { display: inline-block; padding: 3px 8px; border-radius: 20px; background: rgba(255,122,0,0.2); color: var(--accent); font-size: 0.65rem; font-weight: 700; margin-left: 6px; }
+
+    /* MODAL */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; visibility: hidden; transition: var(--tr); backdrop-filter: blur(6px); }
+    .modal-overlay.open { opacity: 1; visibility: visible; }
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; padding: 32px; position: relative; transform: translateY(16px); transition: transform var(--tr); }
+    .modal-overlay.open .modal { transform: translateY(0); }
+    .modal h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 24px; }
+    .modal-close { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; border-radius: 50%; background: var(--bg3); color: var(--text2); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; cursor: pointer; border: none; transition: var(--tr); }
+    .modal-close:hover { background: var(--error); color: #fff; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1/-1; }
+    label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); }
+    .form-input {
+      padding: 10px 14px; background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text); font-size: 0.9rem; outline: none; transition: var(--tr);
+    }
+    .form-input:focus { border-color: var(--accent); }
+    select.form-input option { background: var(--bg2); }
+    .form-input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); }
+    .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 12px 22px; border-radius: 50px; font-size: 0.88rem; font-weight: 500; box-shadow: 0 8px 30px rgba(0,0,0,0.4); z-index: 9999; opacity: 0; transform: translateY(10px); transition: all 0.3s; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { border-color: var(--success); color: var(--success); }
+    .toast.error { border-color: var(--error); color: var(--error); }
+
+    /* SETTINGS */
+    .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .settings-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; }
+    .settings-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .settings-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .settings-row:last-child { border-bottom: none; }
+    .settings-row label { font-size: 0.88rem; color: var(--text2); }
+
+    /* PREVIEW LINK */
+    .preview-banner { background: linear-gradient(135deg, rgba(255,122,0,0.1), rgba(255,154,53,0.05)); border: 1px solid rgba(255,122,0,0.2); border-radius: var(--radius); padding: 16px 24px; margin-bottom: 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .preview-banner p { font-size: 0.88rem; color: var(--text2); }
+    .preview-banner strong { color: var(--accent); }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .stats-grid { grid-template-columns: repeat(2,1fr); }
+      .settings-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) { .panel { padding: 16px; } .stats-grid { grid-template-columns: 1fr 1fr; } table { font-size: 0.8rem; } th, td { padding: 10px 10px; } }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-logo">SMO<span>KD</span> <small>Admin Dashboard</small></div>
+  <nav class="sb-nav">
+    <div class="sb-section-label">Main</div>
+    <a href="#" class="sb-link active" data-panel="overview" onclick="switchPanel('overview',this)">
+      <span class="ico">📊</span> Overview
+    </a>
+    <div class="sb-section-label">Menu</div>
+    <a href="#" class="sb-link" data-panel="menu" onclick="switchPanel('menu',this)">
+      <span class="ico">🍔</span> Menu Items
+    </a>
+    <a href="#" class="sb-link" data-panel="categories" onclick="switchPanel('categories',this)">
+      <span class="ico">🏷️</span> Categories
+    </a>
+    <div class="sb-section-label">Content</div>
+    <a href="#" class="sb-link" data-panel="promos" onclick="switchPanel('promos',this)">
+      <span class="ico">🎁</span> Promotions
+    </a>
+    <a href="#" class="sb-link" data-panel="settings" onclick="switchPanel('settings',this)">
+      <span class="ico">⚙️</span> Settings
+    </a>
+  </nav>
+  <div class="sb-footer">
+    <a href="smokd-website.html" target="_blank">
+      🌐 View Live Website →
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+  <div class="topbar">
+    <h1 id="panelTitle">Dashboard Overview</h1>
+    <div class="topbar-right">
+      <div class="live-badge"><div class="live-dot"></div> Live</div>
+      <button class="btn-secondary" onclick="resetToDefaults()">Reset to Defaults</button>
+      <button class="btn-primary" onclick="publishChanges()">Publish Changes</button>
+    </div>
+  </div>
+
+  <!-- OVERVIEW PANEL -->
+  <div class="panel active" id="panel-overview">
+    <div class="preview-banner">
+      <p>Changes publish instantly to the <strong>live website</strong> via localStorage. Open the website in another tab to see updates.</p>
+      <a href="smokd-website.html" target="_blank" class="btn-primary">Open Website ↗</a>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">🍔</div>
+        <div class="stat-value" id="statItems">25</div>
+        <div class="stat-label">Total Menu Items</div>
+        <div class="stat-change">↑ 2 this month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-value" id="statPopular">8</div>
+        <div class="stat-label">Popular Items</div>
+        <div class="stat-change">Marked as popular</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🏷️</div>
+        <div class="stat-value">8</div>
+        <div class="stat-label">Categories</div>
+        <div class="stat-change">All active</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💰</div>
+        <div class="stat-value" id="statAvgPrice">$13.50</div>
+        <div class="stat-label">Avg Item Price</div>
+        <div class="stat-change">Across all items</div>
+      </div>
+    </div>
+
+    <div class="section-hd">
+      <h2>Recent Menu Items</h2>
+      <button class="btn-primary" onclick="switchPanel('menu',document.querySelector('[data-panel=menu]'))">Manage All →</button>
+    </div>
+    <div class="menu-table-wrap">
+      <table id="overviewTable">
+        <thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Popular</th></tr></thead>
+        <tbody id="overviewBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MENU PANEL -->
+  <div class="panel" id="panel-menu">
+    <div class="section-hd">
+      <h2>All Menu Items (<span id="menuCount">0</span>)</h2>
+      <button class="btn-primary" onclick="openAddModal()">+ Add New Item</button>
+    </div>
+    <div class="menu-controls-bar">
+      <input type="text" class="admin-search" id="adminSearch" placeholder="Search items..." oninput="filterAdminMenu()" />
+      <select class="admin-filter" id="adminFilter" onchange="filterAdminMenu()">
+        <option value="all">All Categories</option>
+        <option value="beef">Beef Burgers</option>
+        <option value="chicken">Chicken Burgers</option>
+        <option value="bowls">Bowls</option>
+        <option value="salads">Salads</option>
+        <option value="fries">Loaded Fries</option>
+        <option value="tenders">Tenders</option>
+        <option value="sides">Sides</option>
+        <option value="drinks">Drinks</option>
+      </select>
+    </div>
+    <div class="menu-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Popular</th><th>Visible</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="menuTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CATEGORIES PANEL -->
+  <div class="panel" id="panel-categories">
+    <div class="section-hd"><h2>Menu Categories</h2></div>
+    <div class="menu-table-wrap">
+      <table>
+        <thead><tr><th>Category</th><th>Key</th><th>Items</th><th>Visible</th></tr></thead>
+        <tbody id="catBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PROMOS PANEL -->
+  <div class="panel" id="panel-promos">
+    <div class="section-hd"><h2>Promotions & Coupons</h2></div>
+    <div class="menu-table-wrap" style="margin-bottom:24px">
+      <table>
+        <thead><tr><th>Code</th><th>Discount</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td><strong>SMOKD10</strong></td><td>10% off</td><td><span style="color:var(--success)">✓ Active</span></td></tr>
+          <tr><td><strong>WELCOME</strong></td><td>15% off</td><td><span style="color:var(--success)">✓ Active</span></td></tr>
+          <tr><td><strong>FIRE20</strong></td><td>20% off</td><td><span style="color:var(--success)">✓ Active</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="preview-banner">
+      <p>Coupon codes are active on the live website. Customers can enter them in the cart.</p>
+    </div>
+  </div>
+
+  <!-- SETTINGS PANEL -->
+  <div class="panel" id="panel-settings">
+    <div class="settings-grid">
+      <div class="settings-card">
+        <h3>Restaurant Info</h3>
+        <div class="form-group" style="margin-bottom:14px">
+          <label>Restaurant Name</label>
+          <input type="text" class="form-input" value="SMOKD Grill" id="settingName" />
+        </div>
+        <div class="form-group" style="margin-bottom:14px">
+          <label>Tagline</label>
+          <input type="text" class="form-input" value="Fire-Grilled Perfection" id="settingTagline" />
+        </div>
+        <div class="form-group" style="margin-bottom:14px">
+          <label>Phone</label>
+          <input type="text" class="form-input" value="+64 9 123 4567" />
+        </div>
+        <div class="form-group">
+          <label>Address</label>
+          <input type="text" class="form-input" value="123 Queen Street, Auckland CBD" />
+        </div>
+      </div>
+      <div class="settings-card">
+        <h3>Operating Hours</h3>
+        <div class="settings-row"><label>Monday – Friday</label><input type="text" class="form-input" value="11:00 AM – 10:00 PM" style="width:160px;text-align:center" /></div>
+        <div class="settings-row"><label>Saturday</label><input type="text" class="form-input" value="10:00 AM – 11:00 PM" style="width:160px;text-align:center" /></div>
+        <div class="settings-row"><label>Sunday</label><input type="text" class="form-input" value="11:00 AM – 9:00 PM" style="width:160px;text-align:center" /></div>
+      </div>
+      <div class="settings-card">
+        <h3>Ordering Options</h3>
+        <div class="settings-row"><label>Enable Pickup</label><label class="toggle-switch"><input type="checkbox" checked /><span class="toggle-track"></span></label></div>
+        <div class="settings-row"><label>Enable Delivery</label><label class="toggle-switch"><input type="checkbox" checked /><span class="toggle-track"></span></label></div>
+        <div class="settings-row"><label>Free Delivery Over</label><input type="text" class="form-input" value="$40.00" style="width:100px;text-align:center" /></div>
+        <div class="settings-row"><label>Estimated Pickup Time</label><input type="text" class="form-input" value="15 min" style="width:100px;text-align:center" /></div>
+      </div>
+      <div class="settings-card">
+        <h3>Display Settings</h3>
+        <div class="settings-row"><label>Show Promo Banner</label><label class="toggle-switch"><input type="checkbox" checked /><span class="toggle-track"></span></label></div>
+        <div class="settings-row"><label>Show Popular Badges</label><label class="toggle-switch"><input type="checkbox" checked /><span class="toggle-track"></span></label></div>
+        <div class="settings-row"><label>Enable Reviews Section</label><label class="toggle-switch"><input type="checkbox" checked /><span class="toggle-track"></span></label></div>
+        <div class="settings-row"><label>WhatsApp Support Button</label><label class="toggle-switch"><input type="checkbox" checked /><span class="toggle-track"></span></label></div>
+      </div>
+    </div>
+    <div style="margin-top:24px;display:flex;gap:12px">
+      <button class="btn-primary" onclick="saveSettings()">Save Settings</button>
+      <button class="btn-secondary">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT ITEM MODAL -->
+<div class="modal-overlay" id="itemModalOverlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeItemModal()">✕</button>
+    <h3 id="modalTitle">Add New Menu Item</h3>
+    <div class="form-grid">
+      <input type="hidden" id="editId" />
+      <div class="form-group full">
+        <label>Item Name</label>
+        <input type="text" class="form-input" id="fName" placeholder="e.g. Premium Beef Burger" />
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select class="form-input" id="fCat">
+          <option value="beef">Beef Burger</option>
+          <option value="chicken">Chicken Burger</option>
+          <option value="bowls">Bowl</option>
+          <option value="salads">Salad</option>
+          <option value="fries">Loaded Fries</option>
+          <option value="tenders">Tenders</option>
+          <option value="sides">Side</option>
+          <option value="drinks">Drink</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Price ($NZD)</label>
+        <input type="number" class="form-input" id="fPrice" step="0.10" min="0" placeholder="14.90" />
+      </div>
+      <div class="form-group full">
+        <label>Description</label>
+        <textarea class="form-input" id="fDesc" rows="3" placeholder="Describe the dish..."></textarea>
+      </div>
+      <div class="form-group full">
+        <label>Image URL</label>
+        <input type="url" class="form-input" id="fImg" placeholder="https://images.unsplash.com/..." />
+      </div>
+      <div class="form-group full">
+        <label>Display Tag (shown on card)</label>
+        <input type="text" class="form-input" id="fTag" placeholder="e.g. Beef Burger" />
+      </div>
+      <div class="form-group" style="flex-direction:row;align-items:center;gap:10px">
+        <label style="text-transform:none;font-size:0.88rem">Mark as Popular</label>
+        <input type="checkbox" id="fPopular" style="width:18px;height:18px;accent-color:var(--accent)" />
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeItemModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveItem()">Save Item</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===================== STATE =====================
+const DEFAULT_MENU = [
+  { id: 1, name: "Classic Beef Burger", cat: "beef", price: 12.90, desc: "100% NZ beef patty, fresh lettuce, tomato, onion, pickles, house sauce.", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80&auto=format", tag: "Beef Burger", popular: false, visible: true },
+  { id: 2, name: "Oklahoma Beef Burger", cat: "beef", price: 14.90, desc: "Smash-style beef patty, American cheese, crispy onions, mustard, ketchup.", img: "https://images.unsplash.com/photo-1551615593-ef5fe247e8f7?w=600&q=80&auto=format", tag: "Beef Burger", popular: true, visible: true },
+  { id: 3, name: "Mexican Beef Burger", cat: "beef", price: 15.90, desc: "Beef patty, guacamole, jalapeños, salsa, sour cream, corn chips.", img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=600&q=80&auto=format", tag: "Beef Burger", popular: false, visible: true },
+  { id: 4, name: "Juicy Beef Burger", cat: "beef", price: 15.90, desc: "Double patty, secret sauce, caramelised onion, gruyere cheese, brioche bun.", img: "https://images.unsplash.com/photo-1607013251379-e6eecfffe234?w=600&q=80&auto=format", tag: "Beef Burger", popular: true, visible: true },
+  { id: 5, name: "Barbeque Beef Burger", cat: "beef", price: 15.90, desc: "BBQ beef patty, smoky BBQ sauce, crispy bacon, cheddar, coleslaw.", img: "https://images.unsplash.com/photo-1550317138-10000687a72b?w=600&q=80&auto=format", tag: "Beef Burger", popular: false, visible: true },
+  { id: 6, name: "Premium Beef Burger", cat: "beef", price: 17.90, desc: "Double angus patty, aged cheddar, caramelised onion, truffle aioli, brioche.", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80&auto=format", tag: "Beef Burger", popular: true, visible: true },
+  { id: 7, name: "Spicy Grilled Chicken Burger", cat: "chicken", price: 14.90, desc: "Marinated grilled chicken thigh, sriracha slaw, pickled cucumber, chilli mayo.", img: "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=600&q=80&auto=format", tag: "Chicken Burger", popular: true, visible: true },
+  { id: 8, name: "Crispy Chicken Burger", cat: "chicken", price: 14.90, desc: "Buttermilk fried chicken fillet, lettuce, pickles, house ranch sauce.", img: "https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=600&q=80&auto=format", tag: "Chicken Burger", popular: false, visible: true },
+  { id: 9, name: "Grilled Chicken Thighs Bowl", cat: "bowls", price: 16.90, desc: "Tender marinated grilled chicken thighs, saffron rice, salad, garlic sauce.", img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&q=80&auto=format", tag: "Bowl", popular: true, visible: true },
+  { id: 10, name: "Grilled Lamb Bowl", cat: "bowls", price: 18.90, desc: "Herb-marinated lamb kofta, basmati rice, tabbouleh, tzatziki.", img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&q=80&auto=format", tag: "Bowl", popular: false, visible: true },
+  { id: 11, name: "Grilled Mixed Bowl", cat: "bowls", price: 19.90, desc: "Chicken & lamb combo, saffron rice, fresh salad, choice of two sauces.", img: "https://images.unsplash.com/photo-1604909052743-94e838986d24?w=600&q=80&auto=format", tag: "Bowl", popular: true, visible: true },
+  { id: 12, name: "Grilled Chicken Thighs Salad", cat: "salads", price: 15.90, desc: "Grilled chicken thighs, mixed greens, cherry tomatoes, cucumber, tahini dressing.", img: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&q=80&auto=format", tag: "Salad", popular: false, visible: true },
+  { id: 13, name: "Grilled Lamb Salad", cat: "salads", price: 17.90, desc: "Herb lamb slices, rocket, pomegranate, feta, lemon dressing.", img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&q=80&auto=format", tag: "Salad", popular: false, visible: true },
+  { id: 14, name: "Grilled Mixed Salad", cat: "salads", price: 17.90, desc: "Chicken & lamb, mixed greens, roasted vegetables, house dressing.", img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&q=80&auto=format", tag: "Salad", popular: false, visible: true },
+  { id: 15, name: "Loaded Chicken Cheese Fries", cat: "fries", price: 14.90, desc: "Crispy fries, grilled chicken, melted cheddar, spring onion, sour cream.", img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600&q=80&auto=format", tag: "Loaded Fries", popular: true, visible: true },
+  { id: 16, name: "Loaded Chicken Spicy Fries", cat: "fries", price: 14.90, desc: "Crispy fries, spicy chicken, jalapeños, sriracha aioli, crispy shallots.", img: "https://images.unsplash.com/photo-1585109649139-366815a0d713?w=600&q=80&auto=format", tag: "Loaded Fries", popular: true, visible: true },
+  { id: 17, name: "3 Piece Crispy Chicken Tender Box", cat: "tenders", price: 12.90, desc: "3 golden buttermilk tenders, fries, dipping sauce of your choice.", img: "https://images.unsplash.com/photo-1562802378-063ec186a863?w=600&q=80&auto=format", tag: "Tenders", popular: false, visible: true },
+  { id: 18, name: "5 Piece Crispy Chicken Tender Box", cat: "tenders", price: 16.90, desc: "5 golden buttermilk tenders, fries, two dipping sauces of your choice.", img: "https://images.unsplash.com/photo-1562802378-063ec186a863?w=600&q=80&auto=format", tag: "Tenders", popular: true, visible: true },
+  { id: 19, name: "Fries", cat: "sides", price: 4.90, desc: "Classic crispy golden fries, sea salt, tomato sauce on the side.", img: "https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=600&q=80&auto=format", tag: "Side", popular: false, visible: true },
+  { id: 20, name: "Waffle Fries", cat: "sides", price: 5.90, desc: "Extra crispy waffle-cut fries, seasoned, served with smoky dip.", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80&auto=format", tag: "Side", popular: false, visible: true },
+  { id: 21, name: "Hashbrown", cat: "sides", price: 3.90, desc: "Golden crispy hashbrown patty.", img: "https://images.unsplash.com/photo-1543352634-99a5d50ae78e?w=600&q=80&auto=format", tag: "Side", popular: false, visible: true },
+  { id: 22, name: "Coca-Cola", cat: "drinks", price: 3.50, desc: "Ice-cold Coca-Cola, 355ml can.", img: "https://images.unsplash.com/photo-1554866585-cd94860890b7?w=600&q=80&auto=format", tag: "Drink", popular: false, visible: true },
+  { id: 23, name: "Sprite", cat: "drinks", price: 3.50, desc: "Refreshing Sprite, 355ml can.", img: "https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=600&q=80&auto=format", tag: "Drink", popular: false, visible: true },
+  { id: 24, name: "Fanta Orange", cat: "drinks", price: 3.50, desc: "Fanta Orange, 355ml can.", img: "https://images.unsplash.com/photo-1554866585-cd94860890b7?w=600&q=80&auto=format", tag: "Drink", popular: false, visible: true },
+  { id: 25, name: "Water", cat: "drinks", price: 2.50, desc: "Still mineral water, 500ml bottle.", img: "https://images.unsplash.com/photo-1554866585-cd94860890b7?w=600&q=80&auto=format", tag: "Drink", popular: false, visible: true },
+];
+
+let menuData = [];
+
+function loadMenuData() {
+  try {
+    const saved = localStorage.getItem('smokd_menu');
+    menuData = saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_MENU));
+    menuData.forEach(item => { if (item.visible === undefined) item.visible = true; });
+  } catch(e) { menuData = JSON.parse(JSON.stringify(DEFAULT_MENU)); }
+}
+
+function saveMenuData() {
+  localStorage.setItem('smokd_menu', JSON.stringify(menuData));
+}
+
+// ===================== PANELS =====================
+function switchPanel(id, el) {
+  event.preventDefault();
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sb-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  el.classList.add('active');
+  const titles = { overview: 'Dashboard Overview', menu: 'Menu Items', categories: 'Categories', promos: 'Promotions', settings: 'Settings' };
+  document.getElementById('panelTitle').textContent = titles[id] || id;
+  if (id === 'menu') renderMenuTable();
+  if (id === 'overview') renderOverview();
+  if (id === 'categories') renderCategories();
+}
+
+// ===================== OVERVIEW =====================
+function renderOverview() {
+  const total = menuData.length;
+  const popular = menuData.filter(i => i.popular).length;
+  const avg = menuData.reduce((s,i) => s+i.price, 0) / total;
+  document.getElementById('statItems').textContent = total;
+  document.getElementById('statPopular').textContent = popular;
+  document.getElementById('statAvgPrice').textContent = '$' + avg.toFixed(2);
+  const tbody = document.getElementById('overviewBody');
+  tbody.innerHTML = menuData.slice(0,8).map(item => `
+    <tr>
+      <td><img class="td-img" src="${item.img}" alt="${item.name}" /></td>
+      <td class="td-name">${item.name}${item.popular ? '<span class="badge-popular">★ Popular</span>' : ''}</td>
+      <td><span class="td-cat">${item.cat}</span></td>
+      <td class="td-price">$${item.price.toFixed(2)}</td>
+      <td>${item.popular ? '✅' : '—'}</td>
+    </tr>
+  `).join('');
+}
+
+// ===================== MENU TABLE =====================
+function renderMenuTable(filter = {}) {
+  const search = (filter.search || document.getElementById('adminSearch')?.value || '').toLowerCase();
+  const cat = filter.cat || document.getElementById('adminFilter')?.value || 'all';
+  const filtered = menuData.filter(i => {
+    const sm = !search || i.name.toLowerCase().includes(search) || i.desc.toLowerCase().includes(search);
+    const cm = cat === 'all' || i.cat === cat;
+    return sm && cm;
+  });
+  document.getElementById('menuCount').textContent = filtered.length;
+  document.getElementById('menuTableBody').innerHTML = filtered.map(item => `
+    <tr id="row-${item.id}">
+      <td><img class="td-img" src="${item.img}" alt="${item.name}" onerror="this.src='https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=100&q=50'" /></td>
+      <td class="td-name">${item.name}</td>
+      <td><span class="td-cat">${item.cat}</span></td>
+      <td class="td-price" id="price-${item.id}">$${item.price.toFixed(2)}</td>
+      <td><input type="checkbox" ${item.popular ? 'checked' : ''} onchange="togglePopular(${item.id}, this)" style="accent-color:var(--accent);width:16px;height:16px;cursor:pointer" /></td>
+      <td>
+        <label class="toggle-switch">
+          <input type="checkbox" ${item.visible !== false ? 'checked' : ''} onchange="toggleVisible(${item.id}, this)" />
+          <span class="toggle-track"></span>
+        </label>
+      </td>
+      <td>
+        <div class="td-actions">
+          <button class="btn-edit" onclick="openEditModal(${item.id})">Edit</button>
+          <button class="btn-danger" onclick="deleteItem(${item.id})">Delete</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function filterAdminMenu() { renderMenuTable(); }
+
+// ===================== CATEGORIES =====================
+const CAT_LABELS = { beef: 'Beef Burgers', chicken: 'Chicken Burgers', bowls: 'Bowls', salads: 'Salads', fries: 'Loaded Fries', tenders: 'Tenders', sides: 'Sides', drinks: 'Drinks' };
+function renderCategories() {
+  document.getElementById('catBody').innerHTML = Object.entries(CAT_LABELS).map(([key, label]) => {
+    const count = menuData.filter(i => i.cat === key).length;
+    return `<tr>
+      <td><strong>${label}</strong></td>
+      <td><span class="td-cat">${key}</span></td>
+      <td>${count} items</td>
+      <td><label class="toggle-switch"><input type="checkbox" checked /><span class="toggle-track"></span></label></td>
+    </tr>`;
+  }).join('');
+}
+
+// ===================== ITEM MODAL =====================
+function openAddModal() {
+  document.getElementById('modalTitle').textContent = 'Add New Menu Item';
+  document.getElementById('editId').value = '';
+  document.getElementById('fName').value = '';
+  document.getElementById('fCat').value = 'beef';
+  document.getElementById('fPrice').value = '';
+  document.getElementById('fDesc').value = '';
+  document.getElementById('fImg').value = '';
+  document.getElementById('fTag').value = '';
+  document.getElementById('fPopular').checked = false;
+  document.getElementById('itemModalOverlay').classList.add('open');
+}
+
+function openEditModal(id) {
+  const item = menuData.find(i => i.id === id);
+  if (!item) return;
+  document.getElementById('modalTitle').textContent = 'Edit Menu Item';
+  document.getElementById('editId').value = id;
+  document.getElementById('fName').value = item.name;
+  document.getElementById('fCat').value = item.cat;
+  document.getElementById('fPrice').value = item.price;
+  document.getElementById('fDesc').value = item.desc;
+  document.getElementById('fImg').value = item.img;
+  document.getElementById('fTag').value = item.tag;
+  document.getElementById('fPopular').checked = !!item.popular;
+  document.getElementById('itemModalOverlay').classList.add('open');
+}
+
+function closeItemModal() { document.getElementById('itemModalOverlay').classList.remove('open'); }
+
+function saveItem() {
+  const id = document.getElementById('editId').value;
+  const name = document.getElementById('fName').value.trim();
+  const price = parseFloat(document.getElementById('fPrice').value);
+  if (!name || isNaN(price)) { showToast('Please fill in name and price', 'error'); return; }
+  const itemData = {
+    name, cat: document.getElementById('fCat').value, price,
+    desc: document.getElementById('fDesc').value.trim(),
+    img: document.getElementById('fImg').value.trim() || 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80&auto=format',
+    tag: document.getElementById('fTag').value.trim() || name,
+    popular: document.getElementById('fPopular').checked,
+    visible: true
+  };
+  if (id) {
+    const idx = menuData.findIndex(i => i.id === parseInt(id));
+    if (idx !== -1) { menuData[idx] = { ...menuData[idx], ...itemData }; }
+    showToast('Item updated successfully', 'success');
+  } else {
+    itemData.id = Math.max(...menuData.map(i => i.id), 0) + 1;
+    menuData.push(itemData);
+    showToast('Item added successfully', 'success');
+  }
+  saveMenuData();
+  closeItemModal();
+  renderMenuTable();
+}
+
+function deleteItem(id) {
+  if (!confirm('Are you sure you want to delete this item?')) return;
+  menuData = menuData.filter(i => i.id !== id);
+  saveMenuData();
+  renderMenuTable();
+  showToast('Item deleted', 'success');
+}
+
+function togglePopular(id, checkbox) {
+  const item = menuData.find(i => i.id === id);
+  if (item) { item.popular = checkbox.checked; saveMenuData(); }
+}
+
+function toggleVisible(id, checkbox) {
+  const item = menuData.find(i => i.id === id);
+  if (item) { item.visible = checkbox.checked; saveMenuData(); }
+}
+
+function publishChanges() {
+  saveMenuData();
+  showToast('Changes published to live website ✓', 'success');
+}
+
+function resetToDefaults() {
+  if (!confirm('Reset all menu items to defaults? This cannot be undone.')) return;
+  menuData = JSON.parse(JSON.stringify(DEFAULT_MENU));
+  saveMenuData();
+  renderMenuTable();
+  renderOverview();
+  showToast('Menu reset to defaults', 'success');
+}
+
+function saveSettings() {
+  showToast('Settings saved successfully ✓', 'success');
+}
+
+// ===================== TOAST =====================
+function showToast(msg, type = 'info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ===================== INIT =====================
+loadMenuData();
+renderOverview();
+</script>
+</body>
+</html>

@@ -111,7 +111,6 @@ function renderMenuGrid(items) {
         <p class="mc-desc">${item.desc}</p>
         <div class="mc-footer">
           <span class="price">$${item.price.toFixed(2)}</span>
-          <button class="btn-add" onclick="addToCart('${item.name.replace(/'/g,"\\'")}', ${item.price}, '${item.img}')">+ Add</button>
         </div>
       </div>
     </div>

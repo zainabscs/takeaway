@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Delivery QR Codes</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root {
+    --bg: #F7F5F0;
+    --ink: #1B1B1B;
+    --ubereats-green: #06C167;
+    --ubereats-dark: #05A85B;
+    --doordash-red: #FF3008;
+    --doordash-dark: #E12A00;
+    --card-bg: #FFFFFF;
+    --muted: #6B6B6B;
+    --border: #E4E1D8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    color: var(--ink);
+    padding: 32px 16px 64px;
+  }
+  .wrap {
+    max-width: 880px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0 0 4px;
+    letter-spacing: -0.02em;
+  }
+  .sub {
+    color: var(--muted);
+    font-size: 15px;
+    margin: 0 0 32px;
+    line-height: 1.5;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 640px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .card.ubereats { border-top: 5px solid var(--ubereats-green); }
+  .card.doordash { border-top: 5px solid var(--doordash-red); }
+
+  .brand-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .dot {
+    width: 12px; height: 12px; border-radius: 50%;
+  }
+  .ubereats .dot { background: var(--ubereats-green); }
+  .doordash .dot { background: var(--doordash-red); }
+
+  .brand-name { font-weight: 700; font-size: 17px; }
+
+  label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  input[type="text"] {
+    width: 100%;
+    padding: 11px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    font-size: 14px;
+    font-family: inherit;
+    background: #FCFBF8;
+  }
+  input[type="text"]:focus {
+    outline: 2px solid var(--ink);
+    outline-offset: 1px;
+  }
+  .generate-btn {
+    padding: 11px 14px;
+    border-radius: 8px;
+    border: none;
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .ubereats .generate-btn { background: var(--ubereats-dark); }
+  .doordash .generate-btn { background: var(--doordash-dark); }
+  .generate-btn:hover { filter: brightness(1.05); }
+
+  .qr-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding-top: 6px;
+    min-height: 190px;
+    justify-content: center;
+  }
+  .qr-area canvas, .qr-area img {
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    padding: 10px;
+    background: white;
+  }
+  .placeholder {
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+    max-width: 220px;
+  }
+  .download-btn {
+    font-size: 13px;
+    color: var(--ink);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    display: none;
+  }
+  .download-btn:hover { background: #F0EEE8; }
+
+  .hint {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Delivery QR Codes</h1>
+  <p class="sub">Paste your Uber Eats and DoorDash storefront (or promo) links below to generate scannable QR codes. Any phone camera can scan these directly — no app required.</p>
+
+  <div class="grid">
+    <div class="card ubereats">
+      <div class="brand-row"><span class="dot"></span><span class="brand-name">Uber Eats</span></div>
+      <label for="ubereats-url">Store link</label>
+      <input type="text" id="ubereats-url" placeholder="https://www.ubereats.com/store/your-restaurant/...">
+      <button class="generate-btn" onclick="generateQR('ubereats')">Generate QR code</button>
+      <div class="qr-area" id="ubereats-area">
+        <div class="placeholder">Your QR code will appear here</div>
+      </div>
+      <button class="download-btn" id="ubereats-download">Download PNG</button>
+    </div>
+
+    <div class="card doordash">
+      <div class="brand-row"><span class="dot"></span><span class="brand-name">DoorDash</span></div>
+      <label for="doordash-url">Store link</label>
+      <input type="text" id="doordash-url" placeholder="https://www.doordash.com/store/your-restaurant/...">
+      <button class="generate-btn" onclick="generateQR('doordash')">Generate QR code</button>
+      <div class="qr-area" id="doordash-area">
+        <div class="placeholder">Your QR code will appear here</div>
+      </div>
+      <button class="download-btn" id="doordash-download">Download PNG</button>
+    </div>
+  </div>
+
+  <p class="hint" style="margin-top:24px;">
+    Tip: on Uber Eats, your storefront link is on your restaurant's public page (Uber Eats Manager → Marketing → your unique link). On DoorDash, find it under the Merchant Portal → Marketing → Storefront link. Either platform's referral or promo link works the same way — just paste it in.
+  </p>
+</div>
+
+<script>
+function generateQR(brand) {
+  const input = document.getElementById(brand + '-url');
+  const url = input.value.trim();
+  const area = document.getElementById(brand + '-area');
+  const downloadBtn = document.getElementById(brand + '-download');
+
+  if (!url) {
+    area.innerHTML = '<div class="placeholder" style="color:#c0392b;">Please paste a link first</div>';
+    downloadBtn.style.display = 'none';
+    return;
+  }
+
+  area.innerHTML = '';
+  const qrContainer = document.createElement('div');
+  area.appendChild(qrContainer);
+
+  const color = brand === 'ubereats' ? '#05A85B' : '#E12A00';
+
+  new QRCode(qrContainer, {
+    text: url,
+    width: 180,
+    height: 180,
+    colorDark: color,
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+
+  downloadBtn.style.display = 'inline-block';
+  downloadBtn.onclick = function() {
+    setTimeout(() => {
+      const canvas = qrContainer.querySelector('canvas');
+      if (canvas) {
+        const link = document.createElement('a');
+        link.download = brand + '-qr-code.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      }
+    }, 100);
+  };
+}
+</script>
+</body>
+</html>

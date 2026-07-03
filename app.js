@@ -98,7 +98,6 @@ function renderMenuGrid(items) {
       <div class="mc-img-wrap" onclick="openItemModal(${item.id})">
         <img src="${item.img}" alt="${item.name}" loading="lazy" />
         ${item.popular ? '<div class="mc-badge">Popular</div>' : ''}
-        <div class="mc-overlay"><span>View Details</span></div>
       </div>
       <div class="mc-body">
         <div class="mc-top">
@@ -225,12 +224,6 @@ function updateCartUI() {
         <strong>${item.name}</strong>
         <span>$${item.price.toFixed(2)}</span>
       </div>
-      <div class="qty-ctrl small">
-        <button onclick="changeCartQty('${item.name.replace(/'/g,"\\'")}', -1)">−</button>
-        <span>${item.qty}</span>
-        <button onclick="changeCartQty('${item.name.replace(/'/g,"\\'")}', 1)">+</button>
-      </div>
-      <button class="ci-remove" onclick="removeFromCart('${item.name.replace(/'/g,"\\'")}')">✕</button>
     </div>
   `).join('');
 

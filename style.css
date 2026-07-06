@@ -57,15 +57,15 @@ input, textarea, select { font-family: inherit; }
   transition: opacity 0.5s ease, visibility 0.5s ease;
 }
 .loader.out { opacity: 0; visibility: hidden; }
-.loader-inner { text-align: center; }
+.loader-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .loader-logo {
-  font-size: 3rem; font-weight: 900; letter-spacing: 0.3em;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  margin-bottom: 24px;
+   margin-bottom: 24px;
+}
+.loader-logo img {
+  width: 150px !important;
 }
 .loader-bar {
-  width: 200px; height: 3px; background: var(--bg3); border-radius: 2px; overflow: hidden;
+  width: 200px; height: 3px; background: var(--bg3); border-radius: 2px; overflow: hidden; 
 }
 .loader-fill {
   height: 100%; width: 0; background: var(--accent);

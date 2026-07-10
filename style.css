@@ -152,7 +152,7 @@ input, textarea, select { font-family: inherit; }
 }
 
 .nav-logo img{
-    height:50px;     /* Adjust if needed */
+    height:60px;     /* Adjust if needed */
     width:auto;
     display:block;
 }
